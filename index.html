@@ -428,9 +428,8 @@ function generateFromCfg(){
 function recalc(){
   let r=cfg.debt;
   cuotas.forEach(c=>{
-    const p=Math.max(0,r-c.value);
-    c.balAfter=p;
-    if(c.status==='pagada')r=p;
+    r=Math.max(0,r-c.value);
+    c.balAfter=r;
   });
 }
 
