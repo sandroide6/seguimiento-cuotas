@@ -264,8 +264,8 @@ td{padding:8px 14px;vertical-align:middle}
           <div class="fg"><label>Nombre</label><input id="cfg-name" type="text" value="Deuda Carro"></div>
           <div class="fg"><label>Deuda inicial ($)</label><input id="cfg-debt" type="number" value="60000000"></div>
           <div class="fg"><label>Total cuotas</label><input id="cfg-total" type="number" value="58" min="1"></div>
-          <div class="fg"><label>Valor cuota base ($)</label><input id="cfg-cuota" type="number" value="1034500"></div>
-          <div class="fg"><label>Fecha de inicio</label><input id="cfg-date" type="date" value="2023-01-15"></div>
+          <div class="fg"><label>Valor cuota base ($)</label><input id="cfg-cuota" type="number" value="1070000"></div>
+          <div class="fg"><label>Fecha de inicio</label><input id="cfg-date" type="date" value="2021-07-15"></div>
         </div>
         <div class="ep-actions">
           <button class="btn btn-primary" onclick="applySettings()">💾 Guardar</button>
@@ -325,7 +325,7 @@ td{padding:8px 14px;vertical-align:middle}
 
 <script>
 /* ── STATE ─────────────────────────────── */
-let cfg = { name:'Deuda Carro', debt:60_000_000, total:58, cuota:1_034_500, startDate:'2023-01-15' };
+let cfg = { name:'Deuda Carro', debt:60_000_000, total:58, cuota:1_070_000, startDate:'2021-07-15' };
 let cuotas=[], filterVal='all', chartInst=null;
 const TODAY=new Date();
 
@@ -337,20 +337,89 @@ const ST={
   'pendiente':{badge:'⏳ Pendiente',cls:'b-gr',btn:'Marcar pagada'},
 };
 
-/* ── GENERATE ───────────────────────────── */
+/* ── DATOS REALES ────────────────────────
+   Fuente: tabla original del préstamo.
+   Cuotas 19 y 31 = $0 / no pagadas.
+   Cuotas 1-38 = $1.070.000, 39-57 = $1.080.000, 58 = $960.000.
+────────────────────────────────────────── */
+const SEED=[
+  {id:1, due:'2021-07-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:2, due:'2021-08-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:3, due:'2021-09-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:4, due:'2021-10-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:5, due:'2021-11-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:6, due:'2021-12-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:7, due:'2022-01-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:8, due:'2022-02-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:9, due:'2022-03-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:10,due:'2022-04-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:11,due:'2022-05-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:12,due:'2022-06-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:13,due:'2022-07-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:14,due:'2022-08-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:15,due:'2022-09-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:16,due:'2022-10-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:17,due:'2022-11-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:18,due:'2022-12-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:19,due:'2023-01-15',value:0,         status:'no-pagada',notes:'No se pagó — cambio de carro'},
+  {id:20,due:'2023-02-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:21,due:'2023-03-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:22,due:'2023-04-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:23,due:'2023-05-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:24,due:'2023-06-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:25,due:'2023-07-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:26,due:'2023-08-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:27,due:'2023-09-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:28,due:'2023-10-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:29,due:'2023-11-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:30,due:'2023-12-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:31,due:'2024-01-15',value:0,         status:'no-pagada',notes:'No se pagó'},
+  {id:32,due:'2024-02-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:33,due:'2024-03-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:34,due:'2024-04-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:35,due:'2024-05-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:36,due:'2024-06-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:37,due:'2024-07-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:38,due:'2024-08-15',value:1_070_000,status:'pagada',   notes:''},
+  {id:39,due:'2024-09-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:40,due:'2024-10-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:41,due:'2024-11-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:42,due:'2024-12-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:43,due:'2025-01-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:44,due:'2025-02-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:45,due:'2025-03-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:46,due:'2025-04-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:47,due:'2025-05-15',value:1_080_000,status:'pagada',   notes:'Último pago registrado en mayo 2025'},
+  {id:48,due:'2025-06-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:49,due:'2025-07-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:50,due:'2025-08-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:51,due:'2025-09-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:52,due:'2025-10-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:53,due:'2025-11-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:54,due:'2025-12-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:55,due:'2026-01-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:56,due:'2026-02-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:57,due:'2026-03-15',value:1_080_000,status:'pagada',   notes:''},
+  {id:58,due:'2026-04-15',value:960_000,  status:'pagada',   notes:'Última cuota — saldo saldado'},
+];
+
+/* ── GENERATE (usa datos reales) ─────────── */
 function generate(){
+  return SEED.map(c=>({...c,balAfter:0}));
+}
+
+/* ── GENERATE DESDE CONFIG (reset manual) ── */
+function generateFromCfg(){
   const start=pd(cfg.startDate), arr=[];
   for(let i=1;i<=cfg.total;i++){
     const due=new Date(start);
     due.setMonth(due.getMonth()+(i-1));
     const yCur=TODAY.getFullYear(), mCur=TODAY.getMonth();
-    const yD=due.getFullYear(),     mD=due.getMonth();
+    const yD=due.getFullYear(), mD=due.getMonth();
     const isCur=yD===yCur&&mD===mCur;
     const isPast=yD<yCur||(yD===yCur&&mD<mCur);
     let status=isPast?'pagada':(isCur?'proxima':'pendiente');
     let notes='';
-    if(i===19){status='no-pagada';notes='No se pagó ese mes';}
-    if(i===31){status='no-pagada';notes='Cambio de carro';}
     arr.push({id:i,due:iso(due),value:cfg.cuota,status,notes,balAfter:0});
   }
   return arr;
@@ -377,8 +446,12 @@ function updateMetrics(){
   const pct=Math.min(100,Math.round(tPaid/cfg.debt*100));
 
   $('hd-name',cfg.name); $('hd-debt',fmt(cfg.debt));
-  $('hd-pct',pct+'%'); el('prog-fill').style.width=pct+'%';
-  $('hd-paid','Pagado: '+fmt(tPaid)); $('hd-rest','Restante: '+fmt(bal));
+  const pctShow=pct+'%'+(bal===0?' 🎉':'');
+  $('hd-pct',pctShow); el('prog-fill').style.width=pct+'%';
+  $('hd-paid','Pagado: '+fmt(tPaid));
+  $('hd-rest',bal===0?'✅ ¡Préstamo saldado!':'Restante: '+fmt(bal));
+  const restEl=el('hd-rest');
+  if(restEl)restEl.style.color=bal===0?'var(--ok)':'var(--er)';
 
   const startD=pd(cfg.startDate),endD=new Date(startD);
   endD.setMonth(endD.getMonth()+cfg.total-1);
@@ -571,7 +644,7 @@ function applySettings(){
   cfg.total=+el('cfg-total').value||cfg.total;
   cfg.cuota=+el('cfg-cuota').value||cfg.cuota;
   cfg.startDate=el('cfg-date').value||cfg.startDate;
-  cuotas=generate();recalc();refresh();
+  cuotas=generateFromCfg();recalc();refresh();
   toast('Configuración actualizada ✓','ok');
 }
 
