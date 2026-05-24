@@ -304,7 +304,7 @@ td{padding:8px 14px;vertical-align:middle}
           <thead>
             <tr>
               <th>#</th><th>Vencimiento</th><th>Valor cuota</th>
-              <th>Saldo tras pago</th><th>Estado</th>
+              <th>Saldo deuda</th><th>Estado</th>
               <th>Notas / Observaciones</th><th>Acción</th>
             </tr>
           </thead>
@@ -440,9 +440,11 @@ function updateMetrics(){
   const skip=cuotas.filter(c=>c.status==='no-pagada').length;
   const pend=cuotas.filter(c=>c.status==='pendiente').length;
   const prox=cuotas.find(c=>c.status==='proxima');
-  const tPaid=cuotas.reduce((s,c)=>s+c.value,0);
-  const bal=Math.max(0,cfg.debt-tPaid);
-  const pct=Math.min(100,Math.round(tPaid/cfg.debt*100));
+  /* Saldo final = última cuota. Total pagado = lo que bajó la deuda. */
+  const lastBal = cuotas.length ? cuotas[cuotas.length-1].balAfter : cfg.debt;
+  const bal     = lastBal;
+  const tPaid   = Math.max(0, cfg.debt - lastBal);
+  const pct     = Math.min(100, Math.round(tPaid / cfg.debt * 100));
 
   $('hd-name',cfg.name); $('hd-debt',fmt(cfg.debt));
   const pctShow=pct+'%'+(bal===0?' 🎉':'');
@@ -483,7 +485,7 @@ function updateChart(){
       todayPt=i+1; lineR.push(rR); lineP.push(rR);
       rP=Math.max(0,rP-c.value);
     }else if(c.status==='no-pagada'){
-      lineR.push(rR); lineP.push(null);
+      rR=Math.max(0,rR-c.value); lineR.push(rR); lineP.push(null);
       rP=Math.max(0,rP-c.value);
     }else{
       lineR.push(null);
@@ -600,7 +602,7 @@ function renderTable(){
               <input type="number" class="edit-cell cc-val" value="${c.value}" onchange="upd(${c.id},'value',+this.value)">
             </div>
             <div class="cc-row">
-              <span class="cc-lbl">Saldo</span>
+              <span class="cc-lbl">Saldo deuda</span>
               <span class="bal cc-val">${fmt(c.balAfter)}</span>
             </div>
             <div class="cc-row">
